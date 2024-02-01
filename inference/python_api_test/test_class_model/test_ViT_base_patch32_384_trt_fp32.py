@@ -25,9 +25,7 @@ def check_model_exist():
     """
     check model exist
     """
-    ViT_base_patch32_384_url = (
-        "https://paddle-qa.bj.bcebos.com/inference_model_clipped/2.0/class/ViT_base_patch32_384.tgz"
-    )
+    ViT_base_patch32_384_url = "https://paddle-qa.bj.bcebos.com/inference_model/2.6/class/ViT_base_patch32_384.tgz"
     if not os.path.exists("./ViT_base_patch32_384/inference.pdiparams"):
         wget.download(ViT_base_patch32_384_url, out="./")
         tar = tarfile.open("ViT_base_patch32_384.tgz")
@@ -69,26 +67,10 @@ def test_trt_fp32_more_bz():
         )
         images_list, npy_list = test_suite.get_images_npy(file_path, images_size)
         fake_input = np.array(images_list[0:batch_size]).astype("float32")
-        input_data_dict = {"inputs": fake_input}
+        input_data_dict = {"x": fake_input}
         output_data_dict = test_suite.get_truth_val(input_data_dict, device="gpu")
 
         del test_suite  # destroy class to save memory
-
-        test_suite1 = InferenceTest()
-        test_suite1.load_config(
-            model_file="./ViT_base_patch32_384/inference.pdmodel",
-            params_file="./ViT_base_patch32_384/inference.pdiparams",
-        )
-        test_suite1.trt_more_bz_test(
-            input_data_dict,
-            output_data_dict,
-            max_batch_size=max_batch_size,
-            precision="trt_fp32",
-            dynamic=True,
-            tuned=True,
-        )
-
-        del test_suite1  # destroy class to save memory
 
         test_suite2 = InferenceTest()
         test_suite2.load_config(
@@ -99,8 +81,10 @@ def test_trt_fp32_more_bz():
             input_data_dict,
             output_data_dict,
             max_batch_size=max_batch_size,
+            min_subgraph_size=1,
             precision="trt_fp32",
             dynamic=True,
+            auto_tuned=True,
         )
 
         del test_suite2  # destroy class to save memory
@@ -126,26 +110,10 @@ def test_jetson_trt_fp32_more_bz():
         )
         images_list, npy_list = test_suite.get_images_npy(file_path, images_size)
         fake_input = np.array(images_list[0:batch_size]).astype("float32")
-        input_data_dict = {"inputs": fake_input}
+        input_data_dict = {"x": fake_input}
         output_data_dict = test_suite.get_truth_val(input_data_dict, device="gpu")
 
         del test_suite  # destroy class to save memory
-
-        test_suite1 = InferenceTest()
-        test_suite1.load_config(
-            model_file="./ViT_base_patch32_384/inference.pdmodel",
-            params_file="./ViT_base_patch32_384/inference.pdiparams",
-        )
-        test_suite1.trt_more_bz_test(
-            input_data_dict,
-            output_data_dict,
-            max_batch_size=max_batch_size,
-            precision="trt_fp32",
-            dynamic=True,
-            tuned=True,
-        )
-
-        del test_suite1  # destroy class to save memory
 
         test_suite2 = InferenceTest()
         test_suite2.load_config(
@@ -156,8 +124,10 @@ def test_jetson_trt_fp32_more_bz():
             input_data_dict,
             output_data_dict,
             max_batch_size=max_batch_size,
+            min_subgraph_size=1,
             precision="trt_fp32",
             dynamic=True,
+            auto_tuned=True,
         )
 
         del test_suite2  # destroy class to save memory
@@ -180,7 +150,7 @@ def test_trt_fp32_bz1_multi_thread():
     )
     images_list, npy_list = test_suite.get_images_npy(file_path, images_size)
     fake_input = np.array(images_list[0:batch_size]).astype("float32")
-    input_data_dict = {"inputs": fake_input}
+    input_data_dict = {"x": fake_input}
     output_data_dict = test_suite.get_truth_val(input_data_dict, device="gpu")
 
     del test_suite  # destroy class to save memory
@@ -193,6 +163,7 @@ def test_trt_fp32_bz1_multi_thread():
     test_suite2.trt_bz1_multi_thread_test(
         input_data_dict,
         output_data_dict,
+        min_subgraph_size=1,
         precision="trt_fp32",
     )
 
